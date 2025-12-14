@@ -2,7 +2,7 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Install system dependencies for OpenCV
+# Install system dependencies (THIS IS KEY!)
 RUN apt-get update && apt-get install -y \
     libgl1-mesa-glx \
     libsm6 \
@@ -11,15 +11,18 @@ RUN apt-get update && apt-get install -y \
     libgomp1 \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy files
+# Copy and install Python requirements
 COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy entire project
 COPY . .
 
-# Install Python packages
-RUN pip install --no-cache-dir -r requirements.txt
+# Download models during build
+RUN python download_models.py
 
 # Expose port
 EXPOSE 5000
 
-# Run app
+# Run Flask app
 CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--timeout", "120", "app:app"]
