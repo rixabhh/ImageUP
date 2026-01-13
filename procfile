@@ -1,0 +1,2 @@
+web: gunicorn app:app
+release: python download_models.py
